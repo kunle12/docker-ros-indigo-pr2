@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# source all /etc/profile.d/ scripts
+. /etc/profile
+
+# when run with some command: start that command
+if [ $# -gt 0 ]; then
+    sleep 1 # give roscore time to start
+    exec "$@"
+
+# when run with a terminal and no command: start a shell
+elif [ -t 0 ]; then
+    shell=$(getent passwd $(whoami) | cut -d: -f7)
+    exec $shell -l
+
+# otherwise: wait on child processes
+else
+    tail -qF *.log &
+    wait $ros_pid
+fi
